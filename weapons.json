@@ -1,0 +1,25 @@
+[
+    {
+        "Name": "Silvered Great Sword",
+        "Damage": "2d6",
+        "Damage_Bonus": 8,
+        "AttackBonus": 7,
+        "Properties": [
+            "Double Attack"
+        ]
+    },
+    {
+        "Name": "Heavy Crossbow",
+        "Damage": "1d10",
+        "Damage_Bonus": 1,
+        "AttackBonus": 4,
+        "Properties": []
+    },
+    {
+        "Name": "Firebolt",
+        "Damage": "2d8",
+        "Damage_Bonus": 0,
+        "AttackBonus": 0,
+        "Properties": []
+    }
+]
