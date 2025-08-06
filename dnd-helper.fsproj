@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="types.fs" />
+    <Compile Include="dice.fs" />
+    <Compile Include="json.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
