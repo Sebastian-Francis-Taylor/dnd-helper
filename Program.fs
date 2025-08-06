@@ -1,10 +1,29 @@
 ﻿open dice
 open JsonStuff
 
-let rec attack weapon_name turn hitbonus =
-    if turn not = 0 then
+type Weapon =
+    { Name: string
+      Damage_Dice: string
+      Damage_Bonus: int
+      Damage_On_Miss: int
+      Hitbonus: int }
+
+let deal_damage damage_dice =
+    match damage_dice with
+    | "d4" -> d4
+    | "d6" -> d6
+    | "d8" -> d8
+    | "d10" -> d10
+    | "d12" -> d12
+    | "d20" -> d20
+    | "d100" -> d100
+    | _ -> 0
+
+let rec attack (weapon: Weapon) (turn: int) =
+    if turn <> 0 then
         let dice_roll = d20
-        let ciritical_hit = if dice_roll = 20 then true else false
+        let critical_hit = if dice_roll = 20 then true else false
+        let hitbonus = weapon.Hitbonus
         let roll_to_hit = dice_roll + hitbonus
 
         printf "roll: %d hit? [y/n]? " roll_to_hit
@@ -17,18 +36,22 @@ let rec attack weapon_name turn hitbonus =
             | "n" -> false
             | _ ->
                 printfn "Invalid input"
-                attack weapon_name turn hitbonus
+                attack weapon turn
+                // Code won't reach here, dummy value
+                false
 
         let damage =
             if hit then
-                weapon_name.damage
+                deal_damage weapon.Damage_Dice
             else
-                weapon_name.damage_on_miss
+                weapon.Damage_On_Miss
 
         printfn "you dealt %d" damage
 
-        // fix recursive call
-        if ciritical_hit then attack turn + 1 else attack turn - 1
+        if critical_hit then
+            attack weapon (turn + 1)
+        else
+            attack weapon (turn - 1)
 
 let rec combat_loop turn =
 
