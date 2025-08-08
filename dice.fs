@@ -2,21 +2,13 @@ module dice
 
 let rnd = System.Random()
 
-let roll dice =
-    let dice_roll = rnd.Next(1, dice + 1)
-    dice_roll
-
-let d4 = roll 4
-let d6 = roll 6
-let d8 = roll 8
-let d10 = roll 10
-let d12 = roll 12
-
-let d20 (advantage: bool) (disadvantage: bool) =    
+let roll (dice: int) (advantage: bool option) (disadvantage: bool option) =
+    let advantage = defaultArg advantage false
+    let disadvantage = defaultArg disadvantage false
+    let dice_roll() = rnd.Next(1, dice + 1)
+    
     match advantage, disadvantage with
-    | true, true -> roll 20
-    | true, false -> max (roll 20) (roll 20)
-    | false, true -> min (roll 20) (roll 20)
-    | false, false -> roll 20
-
-let d100 = roll 100
+    | true, true -> dice_roll()
+    | true, false -> max (dice_roll()) (dice_roll())
+    | false, true -> min (dice_roll()) (dice_roll())
+    | false, false -> dice_roll()
