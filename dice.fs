@@ -11,5 +11,12 @@ let d6 = roll 6
 let d8 = roll 8
 let d10 = roll 10
 let d12 = roll 12
-let d20 = roll 20
+
+let d20 (advantage: bool) (disadvantage: bool) =    
+    match advantage, disadvantage with
+    | true, true -> roll 20
+    | true, false -> max (roll 20) (roll 20)
+    | false, true -> min (roll 20) (roll 20)
+    | false, false -> roll 20
+
 let d100 = roll 100
