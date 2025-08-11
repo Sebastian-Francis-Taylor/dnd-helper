@@ -1,10 +1,11 @@
 module Setup
+
 open System.IO
 open System.Runtime.InteropServices
 open System
 open System.Net.Http
 
-let get_operating_system () : string =
+let get_operating_system (): string =
     if RuntimeInformation.IsOSPlatform OSPlatform.Windows then
         "windows"
     elif RuntimeInformation.IsOSPlatform OSPlatform.OSX then
@@ -14,7 +15,7 @@ let get_operating_system () : string =
     else
         "other"
 
-let get_config_path (os_name: string) =
+let get_config_path (os_name: string): string =
     match os_name with
     | "windows" -> Path.Combine(Environment.GetFolderPath Environment.SpecialFolder.ApplicationData, "dnd-helper")
     | "macos" ->
@@ -40,7 +41,7 @@ let download_json_from_github (raw_url: string) (save_path: string) =
 let clone_database () =
     try
         let weapons_url =
-            "https://raw.githubusercontent.com/<username>/<repo>/<branch>/path/to/weapons.json"
+            "https://raw.githubusercontent.com/Sebastian-Francis-Taylor/dnd-helper/main/weapons.json"
 
         let save_path =
             Path.Combine(get_config_path (get_operating_system ()), "weapons.json")

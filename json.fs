@@ -1,13 +1,10 @@
 module JsonStuff
-
 open System.IO
 open Newtonsoft.Json
+open Types
 
-let load_weapons (file_name: string): Weapon list = 
-    let json = File.ReadAllText(file_name)
-    JsonConvert.DeserializeObject<Weapon list>(json)
+let load_weapons (file_path: string) : Weapon list =
+    let json = File.ReadAllText file_path
+    JsonConvert.DeserializeObject<Weapon[]> json |> Array.toList
 
 let weapons = load_weapons "weapons.json"
-
-let get_weapons_by_name name =
-    weapons |> List.tryFind (fun w -> w.Name = name)

@@ -7,10 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="types.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="dice.fs" />
     <Compile Include="json.fs" />
+    <Compile Include="Setup.fs"/>
     <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>
