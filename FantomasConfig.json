@@ -1,0 +1,13 @@
+{
+  "indentSize": 4,
+  "maxLineLength": 1000000,
+  "keepIfThenInSameLine": true,
+  "keepIndentInBranch": true,
+  "strictMode": false,
+  "insertFinalNewline": true,
+  "spaceBeforeColon": false,
+  "spaceAfterComma": true,
+  "multilineBracketStyle": "Stroustrup",
+  "alignFunctionSignatureToIndentation": true,
+  "experimentalKeepTrailingComma": true
+}
