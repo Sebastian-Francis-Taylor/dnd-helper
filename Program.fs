@@ -43,7 +43,7 @@ let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: boo
     let double_attack = List.contains "Double Attack" weapon.Properties
 
     printf "roll: %d hit? [y/n]? " roll_to_hit
-    let input = System.Console.ReadLine()
+    let input = Console.ReadLine()
     printf "\n"
 
     let hit =
@@ -74,44 +74,43 @@ let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: boo
     | true -> attack weapon (turn + 1) advantage disadvantage
     | false -> attack weapon (turn - 1) advantage disadvantage
 
-let rec combat_loop (weapons_list: Weapon list) turn =
+let rec combat_loop (weapons_list: Weapon list) (turn: int) (advantage: bool) (disadvantage:bool): unit =
 
     if turn = 0 then
         printf "Combat ended"
+    else 
+        printf "Please select a weapon from the list [1,2,..]"
+        print_weapons weapons_list 1
 
-    printf "Please select a weapon from the list [1,2,..]"
-    print_weapons weapons_list 1
+        let input: string = Console.ReadLine()
+        let parsed_input: int = Int32.Parse input
 
-    let input = Console.ReadLine()
-    let int_input = Int32.Parse input
+        let defalt_attacks: int = 1
 
-    let weapon = List.item int_input weapons_list
-
-    let defalt_attacks = 1
-
-    match input with
-    | "whack" -> attack weapon defalt_attacks
-    | _ ->
-        printfn "invalid input try 'whack' or 'range'"
-        combat_loop weapons_list turn
-
-
-
+        if parsed_input >= 1 && parsed_input <= weapons_list.Length then
+            let weapon: Weapon = List.item (parsed_input - 1) weapons_list  
+            attack weapon defalt_attacks advantage disadvantage
+            combat_loop weapons_list (turn - 1) advantage disadvantage
+        else 
+            printfn "invalid input - weapon number must be between 1 and %d" weapons_list.Length
+            combat_loop weapons_list turn advantage disadvantage
 
 [<EntryPoint>]
 let main args =
 
     clone_database()
 
-    let os_name = get_operating_system ()
-    let config_path = get_config_path os_name
+    let os_name: string = get_operating_system ()
+    let config_path: string = get_config_path os_name
     let weapons_list: Weapon List = load_weapons config_path
 
-    let has_arg arg = Array.contains arg args
-    let hasSurge = has_arg "surge"
-    let hasHaste = has_arg "haste"
+    let has_arg arg: bool = Array.contains arg args
+    let hasSurge: bool = has_arg "surge"
+    let hasHaste: bool = has_arg "haste"
+    let advantage: bool = has_arg "advantage"
+    let disadvantage: bool = has_arg "disadvantage"
 
-    let number_of_attacks =
+    let number_of_attacks: int =
         // change values so it actually alligns with the rules as written
         match hasSurge, hasHaste with
         | true, true -> 3
@@ -121,6 +120,6 @@ let main args =
 
     printfn "Number of attacks: %d" number_of_attacks
 
-    combat_loop weapons_list number_of_attacks
+    combat_loop weapons_list (number_of_attacks-1) advantage disadvantage
 
     0
