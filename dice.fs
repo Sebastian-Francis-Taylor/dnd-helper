@@ -3,9 +3,9 @@ module dice
 let rnd = System.Random()
 
 let roll (dice: int) (advantage: bool option) (disadvantage: bool option): int =
-    let advantage = defaultArg advantage false
-    let disadvantage = defaultArg disadvantage false
-    let dice_roll() = rnd.Next(1, dice + 1)
+    let advantage: bool = defaultArg advantage false
+    let disadvantage: bool = defaultArg disadvantage false
+    let dice_roll(): int = rnd.Next(1, dice + 1)
     
     match advantage, disadvantage with
     | true, true -> dice_roll()

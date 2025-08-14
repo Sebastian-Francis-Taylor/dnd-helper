@@ -87,11 +87,12 @@ let rec combat_loop (weapons_list: Weapon list) (turn: int) (advantage: bool) (d
 
         let defalt_attacks: int = 1
 
-        if parsed_input >= 1 && parsed_input <= weapons_list.Length then
+        match parsed_input >= 1 && parsed_input <= weapons_list.Length with
+        | true ->  
             let weapon: Weapon = List.item (parsed_input - 1) weapons_list  
             attack weapon defalt_attacks advantage disadvantage
             combat_loop weapons_list (turn - 1) advantage disadvantage
-        else 
+        | false ->
             printfn "invalid input - weapon number must be between 1 and %d" weapons_list.Length
             combat_loop weapons_list turn advantage disadvantage
 
