@@ -16,70 +16,84 @@ let rec print_weapons weapons index: unit =
         printfn "%d: %s" index head.Name
         print_weapons tail (index + 1)
 
-let deal_damage (damage_dice: string) : int =
-    match damage_dice with
-    | "d4" -> roll 4 None None
-    | "d6" -> roll 6 None None
-    | "d8" -> roll 8 None None
-    | "d10" -> roll 10 None None
-    | "d12" -> roll 12 None None
-    | "d20" -> roll 20 None None
-    | "d100" -> roll 100 None None
-    | _ -> roll 0 None None
+let rec deal_damage (damage_dice: string) (attacks_amount: int) (damage_dealt: int) : int =
+
+    (*
+    THE GAME PLAN:
+    - paramters damage_dice attacks_amount ?damage_dealt?
+    recursively sum the damage dealt as long as attacks_amount is not 0 (not sure if it should be 1 instead?)
+    *)
+    let split_dice = damage_dice.Split 'd'
+
+    let temp_damage = 
+        match split_dice[1] with
+        | "4" -> roll 4 None None
+        | "6" -> roll 6 None None
+        | "8" -> roll 8 None None
+        | "10" -> roll 10 None None
+        | "12" -> roll 12 None None
+        | "20" -> roll 20 None None
+        | "100" -> roll 100 None None
+        | _ -> 
+            printfn "failed to parse damage_dice"
+            0
+    match attacks_amount with
+    | 1 -> damage_dealt + temp_damage
+    | _ -> deal_damage damage_dice (attacks_amount - 1) (damage_dealt + temp_damage)
 
 let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: bool) =
     if turn = 0 then
         printfn "Attack is over"
+    else 
+        let dice_roll = roll 20 (Some advantage) (Some disadvantage)
 
-    let dice_roll = roll 20 (Some advantage) (Some disadvantage)
+        let critical_hit =
+            match dice_roll with
+            | 20 -> true
+            | _ -> false
 
-    let critical_hit =
-        match dice_roll with
-        | 20 -> true
-        | _ -> false
+        let hitbonus = weapon.Hitbonus
+        let roll_to_hit = dice_roll + hitbonus
+        let double_attack = List.contains "Double Attack" weapon.Properties
 
-    let hitbonus = weapon.Hitbonus
-    let roll_to_hit = dice_roll + hitbonus
-    let double_attack = List.contains "Double Attack" weapon.Properties
+        printf "roll: %d hit? [y/n]? " roll_to_hit
+        let input = Console.ReadLine()
+        printf "\n"
 
-    printf "roll: %d hit? [y/n]? " roll_to_hit
-    let input = Console.ReadLine()
-    printf "\n"
+        let hit =
+            match input with
+            | "y" -> true
+            | "n" -> false
+            | _ ->
+                printfn "Invalid input"
+                attack weapon turn advantage disadvantage
+                // Code won't reach here, dummy value
+                false
 
-    let hit =
-        match input with
-        | "y" -> true
-        | "n" -> false
-        | _ ->
-            printfn "Invalid input"
-            attack weapon turn advantage disadvantage
-            // Code won't reach here, dummy value
-            false
+        let rec damage (double_attack: bool) : int =
+            let hit_damage =
+                match hit with
+                | true -> deal_damage weapon.Damage_Dice 1 0
+                | false -> weapon.Damage_On_Miss
 
-    let rec damage (double_attack: bool) : int =
-        let hit_damage =
-            match hit with
-            | true -> deal_damage weapon.Damage_Dice
-            | false -> weapon.Damage_On_Miss
+            match double_attack with
+            | true -> hit_damage + damage false
+            | false -> hit_damage
 
-        match double_attack with
-        | true -> hit_damage + damage false
-        | false -> hit_damage
+        let dealt_damage = damage double_attack
 
-    let dealt_damage = damage double_attack
+        printfn "you dealt %d damage" dealt_damage
 
-    printfn "you dealt %d" dealt_damage
-
-    match critical_hit with
-    | true -> attack weapon (turn + 1) advantage disadvantage
-    | false -> attack weapon (turn - 1) advantage disadvantage
+        match critical_hit with
+        | true -> attack weapon (turn + 1) advantage disadvantage
+        | false -> attack weapon (turn - 1) advantage disadvantage
 
 let rec combat_loop (weapons_list: Weapon list) (turn: int) (advantage: bool) (disadvantage: bool) : unit =
 
     if turn = 0 then
-        printf "Combat ended"
+        printfn "Combat ended"
     else
-        printf "Please select a weapon from the list [1,2,..]"
+        printfn "Please select a weapon from the list [1,2,..]"
         print_weapons weapons_list 1
 
         let input: string = Console.ReadLine()
