@@ -9,7 +9,7 @@ open System.Runtime.InteropServices
 open System
 open System.Net.Http
 
-let rec print_weapons weapons index =
+let rec print_weapons weapons index: unit =
     match weapons with
     | [] -> ()
     | head :: tail ->
@@ -56,14 +56,14 @@ let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: boo
             // Code won't reach here, dummy value
             false
 
-    let rec damage (double_attack: bool): int =
+    let rec damage (double_attack: bool) : int =
         let hit_damage =
-            match hit with 
+            match hit with
             | true -> deal_damage weapon.Damage_Dice
             | false -> weapon.Damage_On_Miss
 
-        match double_attack with 
-        | true -> hit_damage + damage false        
+        match double_attack with
+        | true -> hit_damage + damage false
         | false -> hit_damage
 
     let dealt_damage = damage double_attack
@@ -74,11 +74,11 @@ let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: boo
     | true -> attack weapon (turn + 1) advantage disadvantage
     | false -> attack weapon (turn - 1) advantage disadvantage
 
-let rec combat_loop (weapons_list: Weapon list) (turn: int) (advantage: bool) (disadvantage:bool): unit =
+let rec combat_loop (weapons_list: Weapon list) (turn: int) (advantage: bool) (disadvantage: bool) : unit =
 
     if turn = 0 then
         printf "Combat ended"
-    else 
+    else
         printf "Please select a weapon from the list [1,2,..]"
         print_weapons weapons_list 1
 
@@ -88,8 +88,8 @@ let rec combat_loop (weapons_list: Weapon list) (turn: int) (advantage: bool) (d
         let defalt_attacks: int = 1
 
         match parsed_input >= 1 && parsed_input <= weapons_list.Length with
-        | true ->  
-            let weapon: Weapon = List.item (parsed_input - 1) weapons_list  
+        | true ->
+            let weapon: Weapon = List.item (parsed_input - 1) weapons_list
             attack weapon defalt_attacks advantage disadvantage
             combat_loop weapons_list (turn - 1) advantage disadvantage
         | false ->
@@ -99,13 +99,18 @@ let rec combat_loop (weapons_list: Weapon list) (turn: int) (advantage: bool) (d
 [<EntryPoint>]
 let main args =
 
-    clone_database()
+    clone_database ()
 
     let os_name: string = get_operating_system ()
+    printfn "DEBUG! OPERATING SYSTEM: %s" os_name
     let config_path: string = get_config_path os_name
-    let weapons_list: Weapon List = load_weapons config_path
+    printfn "DEBUG! CONFIG PATH: %s" config_path
+    create_config_dir os_name
+    clone_database()
+    let weapons_json_path = get_weapons_path os_name
+    let weapons_list: Weapon List = load_weapons weapons_json_path
 
-    let has_arg arg: bool = Array.contains arg args
+    let has_arg arg : bool = Array.contains arg args
     let hasSurge: bool = has_arg "surge"
     let hasHaste: bool = has_arg "haste"
     let advantage: bool = has_arg "advantage"
@@ -121,6 +126,6 @@ let main args =
 
     printfn "Number of attacks: %d" number_of_attacks
 
-    combat_loop weapons_list (number_of_attacks-1) advantage disadvantage
+    combat_loop weapons_list number_of_attacks advantage disadvantage
 
     0
