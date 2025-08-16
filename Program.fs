@@ -4,10 +4,7 @@ open JsonStuff
 open Setup
 open Types
 
-open System.IO
-open System.Runtime.InteropServices
 open System
-open System.Net.Http
 
 let rec print_weapons weapons index: unit =
     match weapons with
@@ -18,11 +15,6 @@ let rec print_weapons weapons index: unit =
 
 let rec deal_damage (damage_dice: string) (attacks_amount: int) (damage_dealt: int) : int =
 
-    (*
-    THE GAME PLAN:
-    - paramters damage_dice attacks_amount ?damage_dealt?
-    recursively sum the damage dealt as long as attacks_amount is not 0 (not sure if it should be 1 instead?)
-    *)
     let split_dice = damage_dice.Split 'd'
 
     let temp_damage = 
