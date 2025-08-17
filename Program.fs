@@ -6,7 +6,7 @@ open Types
 
 open System
 
-let rec print_weapons weapons index: unit =
+let rec print_weapons weapons index : unit =
     match weapons with
     | [] -> ()
     | head :: tail ->
@@ -17,7 +17,7 @@ let rec deal_damage (damage_dice: string) (attacks_amount: int) (damage_dealt: i
 
     let split_dice = damage_dice.Split 'd'
 
-    let temp_damage = 
+    let temp_damage =
         match split_dice[1] with
         | "4" -> roll 4 None None
         | "6" -> roll 6 None None
@@ -26,9 +26,10 @@ let rec deal_damage (damage_dice: string) (attacks_amount: int) (damage_dealt: i
         | "12" -> roll 12 None None
         | "20" -> roll 20 None None
         | "100" -> roll 100 None None
-        | _ -> 
+        | _ ->
             printfn "failed to parse damage_dice"
             0
+
     match attacks_amount with
     | 1 -> damage_dealt + temp_damage
     | _ -> deal_damage damage_dice (attacks_amount - 1) (damage_dealt + temp_damage)
@@ -36,7 +37,7 @@ let rec deal_damage (damage_dice: string) (attacks_amount: int) (damage_dealt: i
 let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: bool) =
     if turn = 0 then
         printfn "Attack is over"
-    else 
+    else
         let dice_roll = roll 20 (Some advantage) (Some disadvantage)
 
         let critical_hit =
@@ -69,12 +70,13 @@ let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: boo
                 | false -> weapon.Damage_On_Miss
 
             match double_attack with
-            | true -> 
+            | true ->
                 printfn "DAMAGE RECURSIVE CALL"
                 printfn "round 1 hit dmg: %d" hit_damage
                 hit_damage + damage false
             | false -> hit_damage
 
+        // damage bonus is left out here so that the weapon does not need to be in scope for the damage and deal_damage functions
         let base_damage: int = damage double_attack
         let bonus_damage: int = weapon.Damage_Bonus * if double_attack then 1 else 1
         let dealt_damage: int = base_damage + bonus_damage
@@ -107,6 +109,17 @@ let rec combat_loop (weapons_list: Weapon list) (turn: int) (advantage: bool) (d
             printfn "invalid input - weapon number must be between 1 and %d" weapons_list.Length
             combat_loop weapons_list turn advantage disadvantage
 
+let args_help () : unit =
+    let lines =
+        [ "here are the valid arguments to pass to the program and their function:"
+          "'surge'        - the ability Action Surge is being used (extra attack)"
+          "'haste'        - the spell Haste has been cast on your character (extra attack)"
+          "'advantage'    - your character has advantage on the roll to hit"
+          "'disadvantage' - your character has disadvantage on the roll to hit"
+          "'help'         - prints this help menu :)" ]
+
+    lines |> List.iter (printfn "%s")
+
 [<EntryPoint>]
 let main args =
 
@@ -117,26 +130,29 @@ let main args =
     let config_path: string = get_config_path os_name
     printfn "DEBUG! CONFIG PATH: %s" config_path
     create_config_dir os_name
-    clone_database()
+    clone_database ()
     let weapons_json_path = get_weapons_path os_name
     let weapons_list: Weapon List = load_weapons weapons_json_path
 
     let has_arg arg : bool = Array.contains arg args
-    let hasSurge: bool = has_arg "surge"
-    let hasHaste: bool = has_arg "haste"
+    let has_surge: bool = has_arg "surge"
+    let has_haste: bool = has_arg "haste"
     let advantage: bool = has_arg "advantage"
     let disadvantage: bool = has_arg "disadvantage"
+    let help: bool = has_arg "help"
 
-    let number_of_attacks: int =
-        // change values so it actually alligns with the rules as written
-        match hasSurge, hasHaste with
-        | true, true -> 3
-        | true, false -> 2
-        | false, true -> 2
-        | false, false -> 1
+    if help then
+        args_help ()
+    else
+        // Rules as written:
+        let number_of_attacks: int =
+            match has_surge, has_haste with
+            | true, true -> 3
+            | true, false -> 2
+            | false, true -> 2
+            | false, false -> 1
 
-    printfn "Number of attacks: %d" number_of_attacks
-
-    combat_loop weapons_list number_of_attacks advantage disadvantage
+        printfn "Number of attacks: %d" number_of_attacks
+        combat_loop weapons_list number_of_attacks advantage disadvantage
 
     0
