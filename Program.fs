@@ -69,10 +69,15 @@ let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: boo
                 | false -> weapon.Damage_On_Miss
 
             match double_attack with
-            | true -> hit_damage + damage false
+            | true -> 
+                printfn "DAMAGE RECURSIVE CALL"
+                printfn "round 1 hit dmg: %d" hit_damage
+                hit_damage + damage false
             | false -> hit_damage
 
-        let dealt_damage = damage double_attack
+        let base_damage: int = damage double_attack
+        let bonus_damage: int = weapon.Damage_Bonus * if double_attack then 1 else 1
+        let dealt_damage: int = base_damage + bonus_damage
 
         printfn "you dealt %d damage" dealt_damage
 
