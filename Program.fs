@@ -71,8 +71,6 @@ let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: boo
 
             match double_attack with
             | true ->
-                printfn "DAMAGE RECURSIVE CALL"
-                printfn "round 1 hit dmg: %d" hit_damage
                 hit_damage + damage false
             | false -> hit_damage
 
@@ -123,12 +121,7 @@ let args_help () : unit =
 [<EntryPoint>]
 let main args =
 
-    clone_database ()
-
     let os_name: string = get_operating_system ()
-    printfn "DEBUG! OPERATING SYSTEM: %s" os_name
-    let config_path: string = get_config_path os_name
-    printfn "DEBUG! CONFIG PATH: %s" config_path
     create_config_dir os_name
     clone_database ()
     let weapons_json_path = get_weapons_path os_name

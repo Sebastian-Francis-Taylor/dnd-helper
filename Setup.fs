@@ -36,31 +36,22 @@ let get_weapons_path (os_name: string) : string =
 let download_json_from_github (raw_url: string) (save_path: string) =
     task {
         use client = new HttpClient()
-        printfn "client defined"
         let! json = client.GetStringAsync raw_url
-        printfn "string defined"
         File.WriteAllText(save_path, json)
-        printfn "file written"
-        printfn "Downloaded JSON to %s" save_path
     }
 
 let clone_database () =
     try
         let weapons_url =
             "https://raw.githubusercontent.com/Sebastian-Francis-Taylor/dnd-helper/main/weapons.json"
-        printfn "debug: weapons_url = %s" weapons_url
 
         let save_path =
             Path.Combine(get_config_path (get_operating_system ()), "weapons.json")
-        printfn "debug: save_path = %s" save_path
 
-        printfn "downloading from github"
-        // issue is here
         download_json_from_github weapons_url save_path
         |> Async.AwaitTask
         |> Async.RunSynchronously
 
-        printfn "Weapons database downloaded to %s" save_path
     with
     | :? HttpRequestException as ex -> printfn "Failed to download weapons database: %s" ex.Message
     | :? IOException as ex -> printfn "File system error: %s" ex.Message
