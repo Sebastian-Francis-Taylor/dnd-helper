@@ -1,5 +1,5 @@
 pkgname=dnd-helper
-pkgver=0.0.1
+pkgver=0.1.1
 pkgrel=1
 pkgdesc="A simple dnd combat helper app"
 arch=('x86_64')

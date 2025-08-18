@@ -6,6 +6,14 @@ open Types
 
 open System
 
+
+let pretty_print (text: string) =
+    let padding = 1
+    let boxWidth = text.Length + padding * 2
+    printf " ╭"; printf "%s" (String.replicate boxWidth "─"); printfn "╮"
+    printfn " │%s%s%s│" (String.replicate padding " ") text (String.replicate padding " ")
+    printf " ╰"; printf "%s" (String.replicate boxWidth "─"); printfn "╯"
+
 let rec print_weapons weapons index : unit =
     match weapons with
     | [] -> ()
@@ -13,30 +21,40 @@ let rec print_weapons weapons index : unit =
         printfn "%d: %s" index head.Name
         print_weapons tail (index + 1)
 
+// deal_damage accounts is recursive to account for situations where the user can attack multiple times
 let rec deal_damage (damage_dice: string) (attacks_amount: int) (damage_dealt: int) : int =
 
-    let split_dice = damage_dice.Split 'd'
+    // temp_damage accounts for situations like 2d6
+    // where it then rolls two d6's
+    let rec temp_damage (rolling_dice: int) (rolls_amount: int) (damage_dealt: int): int =
+        let allowed_dice: int list = [4;6;8;10;12;20;100]
 
-    let temp_damage =
-        match split_dice[1] with
-        | "4" -> roll 4 None None
-        | "6" -> roll 6 None None
-        | "8" -> roll 8 None None
-        | "10" -> roll 10 None None
-        | "12" -> roll 12 None None
-        | "20" -> roll 20 None None
-        | "100" -> roll 100 None None
-        | _ ->
-            printfn "failed to parse damage_dice"
-            0
+        let damage_roll: int = 
+            match List.contains rolling_dice allowed_dice with
+            | true -> roll rolling_dice None None
+            | false -> 
+                printfn "Invalid dice: d%d" rolling_dice
+                0
+
+        let current_damage: int = damage_roll + damage_dealt
+        match rolls_amount with
+        | 1 -> current_damage + damage_dealt
+        | _ -> temp_damage rolling_dice (rolls_amount-1) current_damage
+
+    let split_dice: string array = damage_dice.Split 'd'
+    let rolling_dice: int = int split_dice[1]
+    let dice_amount: int  = int split_dice[0]
+
+    let pre_damage: int = 0
+    let current_damage: int = temp_damage rolling_dice dice_amount pre_damage
 
     match attacks_amount with
-    | 1 -> damage_dealt + temp_damage
-    | _ -> deal_damage damage_dice (attacks_amount - 1) (damage_dealt + temp_damage)
+    | 1 -> damage_dealt + current_damage
+    | _ -> deal_damage damage_dice (attacks_amount-1) (damage_dealt + current_damage)
 
 let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: bool) =
     if turn = 0 then
-        printfn "Attack is over"
+        printfn""
     else
         let dice_roll = roll 20 (Some advantage) (Some disadvantage)
 
@@ -44,6 +62,9 @@ let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: boo
             match dice_roll with
             | 20 -> true
             | _ -> false
+
+        if critical_hit then
+            printfn "NAT 20 BABY!!"
 
         let hitbonus = weapon.Hitbonus
         let roll_to_hit = dice_roll + hitbonus
@@ -63,23 +84,25 @@ let rec attack (weapon: Weapon) (turn: int) (advantage: bool) (disadvantage: boo
                 // Code won't reach here, dummy value
                 false
 
-        let rec damage (double_attack: bool) : int =
+        // SOMETHINGS WRONG I CAN FEEL IT
+        let damage (double_attack: bool) : int =
+
+            let attacks_amount: int=
+                match double_attack with
+                | true -> 2
+                | false -> 1
+
             let hit_damage =
                 match hit with
-                | true -> deal_damage weapon.Damage_Dice 1 0
+                | true -> 
+                    deal_damage weapon.Damage_Dice attacks_amount 0
                 | false -> weapon.Damage_On_Miss
 
-            match double_attack with
-            | true ->
-                hit_damage + damage false
-            | false -> hit_damage
+            hit_damage
 
-        // damage bonus is left out here so that the weapon does not need to be in scope for the damage and deal_damage functions
-        let base_damage: int = damage double_attack
-        let bonus_damage: int = weapon.Damage_Bonus * if double_attack then 1 else 1
-        let dealt_damage: int = base_damage + bonus_damage
-
-        printfn "you dealt %d damage" dealt_damage
+        let total_damage: int = damage double_attack
+        let damage = sprintf "you dealt %d damage" total_damage
+        pretty_print damage
 
         match critical_hit with
         | true -> attack weapon (turn + 1) advantage disadvantage
